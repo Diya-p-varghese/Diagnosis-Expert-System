@@ -1,0 +1,448 @@
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+
+class ExpertSystem:
+    def __init__(self):
+        self.knowledge_base = [
+            # Common diseases with 2-3 symptoms
+            {
+                "symptoms": ["fever", "cough"],
+                "diagnosis": "Bronchitis"
+            },
+            {
+                "symptoms": ["fever", "rash"],
+                "diagnosis": "Rubella"
+            },
+            {
+                "symptoms": ["itchy skin", "red rash"],
+                "diagnosis": "Dermatitis"
+            },
+            {
+                "symptoms": ["fatigue", "pale skin"],
+                "diagnosis": "Iron Deficiency Anemia"
+            },
+            {
+                "symptoms": ["burning sensation during urination", "frequent urination"],
+                "diagnosis": "Cystitis"
+            },
+            {
+                "symptoms": ["fever", "body aches"],
+                "diagnosis": "Viral Fever"
+            },
+            {
+                "symptoms": ["sore throat", "difficulty swallowing"],
+                "diagnosis": "Tonsillitis"
+            },
+            {
+                "symptoms": ["chest pain", "shortness of breath"],
+                "diagnosis": "Angina"
+            },
+            {
+                "symptoms": ["fever", "headache"],
+                "diagnosis": "Dengue"
+            },
+            {
+                "symptoms": ["fever", "nausea"],
+                "diagnosis": "Food Poisoning"
+            },
+            {
+                "symptoms": ["cough", "wheezing"],
+                "diagnosis": "Bronchiolitis"
+            },
+            {
+                "symptoms": ["ear pain", "fluid drainage from ear"],
+                "diagnosis": "Otitis Media"
+            },
+            {
+                "symptoms": ["itchy eyes", "red eyes"],
+                "diagnosis": "Allergic Conjunctivitis"
+            },
+            {
+                "symptoms": ["dry mouth", "thirst"],
+                "diagnosis": "Dehydration"
+            },
+            {
+                "symptoms": ["sneezing", "runny nose"],
+                "diagnosis": "Allergic Rhinitis"
+            },
+            {
+                "symptoms": ["fever", "joint pain"],
+                "diagnosis": "Chikungunya"
+            },
+            {
+                "symptoms": ["nausea", "vomiting"],
+                "diagnosis": "Gastritis"
+            },
+            {
+                "symptoms": ["muscle pain", "fatigue"],
+                "diagnosis": "Fibromyalgia"
+            },
+            {
+                "symptoms": ["dizziness", "weakness"],
+                "diagnosis": "Low Blood Pressure"
+            },
+            {
+                "symptoms": ["fever", "sore throat"],
+                "diagnosis": "Strep Throat"
+            },
+            # Common diseases with 4-6 symptoms
+            {
+                "symptoms": ["fever", "cough", "shortness of breath", "fatigue"],
+                "diagnosis": "Pneumonia"
+            },
+            {
+                "symptoms": ["chest pain", "cough", "fatigue", "sweating"],
+                "diagnosis": "Tuberculosis"
+            },
+            {
+                "symptoms": ["fever", "muscle pain", "headache", "vomiting"],
+                "diagnosis": "Leptospirosis"
+            },
+            {
+                "symptoms": ["sore throat", "fever", "headache", "rash"],
+                "diagnosis": "Scarlet Fever"
+            },
+            {
+                "symptoms": ["fever", "muscle aches", "fatigue", "vomiting"],
+                "diagnosis": "Influenza (Flu)"
+            },
+            {
+                "symptoms": ["fever", "sore throat", "cough", "runny nose"],
+                "diagnosis": "Pharyngitis"
+            },
+            {
+                "symptoms": ["fatigue", "weight gain", "dry skin", "hair loss"],
+                "diagnosis": "Hypothyroidism"
+            },
+            {
+                "symptoms": ["chest pain", "shortness of breath", "dizziness", "nausea"],
+                "diagnosis": "Panic Attack"
+            },
+            {
+                "symptoms": ["fever", "cough", "chest pain", "shortness of breath"],
+                "diagnosis": "Bronchopneumonia"
+            },
+            {
+                "symptoms": ["fever", "nausea", "vomiting", "loss of appetite"],
+                "diagnosis": "Hepatitis A"
+            },
+            {
+                "symptoms": ["fatigue", "muscle pain", "headache", "fever"],
+                "diagnosis": "Dengue"
+            },
+            {
+                "symptoms": ["shortness of breath", "chest tightness", "wheezing", "coughing"],
+                "diagnosis": "Asthma"
+            },
+            {
+                "symptoms": ["headache", "fever", "neck stiffness", "confusion"],
+                "diagnosis": "Encephalitis"
+            },
+            {
+                "symptoms": ["swelling", "pain in joints", "stiffness", "redness"],
+                "diagnosis": "Gout"
+            },
+            {
+                "symptoms": ["fever", "nausea", "abdominal pain", "diarrhea"],
+                "diagnosis": "Salmonellosis"
+            },
+            {
+                "symptoms": ["fatigue", "muscle weakness", "difficulty breathing", "confusion"],
+                "diagnosis": "Hypokalemia"
+            },
+            {
+                "symptoms": ["fever", "rash", "joint pain", "red eyes"],
+                "diagnosis": "Zika Virus"
+            },
+            {
+                "symptoms": ["fever", "muscle pain", "rash", "joint pain"],
+                "diagnosis": "Chikungunya"
+            },
+            {
+                "symptoms": ["vomiting", "diarrhea", "dehydration", "abdominal cramps"],
+                "diagnosis": "Rotavirus"
+            },
+            {
+                "symptoms": ["fever", "headache", "sensitivity to light", "nausea"],
+                "diagnosis": "Meningitis"
+            },
+            # Common diseases with 7+ symptoms
+            {
+                "symptoms": ["fever", "sore throat", "fatigue", "muscle aches", "cough", "headache", "runny nose"],
+                "diagnosis": "Influenza (Flu)"
+            },
+            {
+                "symptoms": ["fever", "chills", "headache", "muscle pain", "nausea", "vomiting", "rash"],
+                "diagnosis": "Rocky Mountain Spotted Fever"
+            },
+            {
+                "symptoms": ["fatigue", "joint pain", "swelling", "stiffness", "redness", "reduced range of motion", "morning stiffness"],
+                "diagnosis": "Rheumatoid Arthritis"
+            },
+            {
+                "symptoms": ["fever", "abdominal pain", "diarrhea", "vomiting", "loss of appetite", "headache", "weakness"],
+                "diagnosis": "Typhoid Fever"
+            },
+            {
+                "symptoms": ["fever", "cough", "chest pain", "fatigue", "shortness of breath", "muscle aches", "sweating"],
+                "diagnosis": "Pneumonia"
+            },
+            {
+                "symptoms": ["fatigue", "weight loss", "night sweats", "persistent cough", "fever", "chest pain", "coughing up blood"],
+                "diagnosis": "Tuberculosis"
+            },
+            {
+                "symptoms": ["fever", "chills", "muscle pain", "headache", "vomiting", "diarrhea", "cough"],
+                "diagnosis": "Ebola"
+            },
+            {
+                "symptoms": ["fever", "joint pain", "muscle pain", "headache", "fatigue", "rash", "nausea"],
+                "diagnosis": "Yellow Fever"
+            },
+            {
+                "symptoms": ["fatigue", "weight gain", "sensitivity to cold", "dry skin", "muscle weakness", "hair loss", "depression"],
+                "diagnosis": "Hypothyroidism"
+            },
+            {
+                "symptoms": ["fatigue", "weight loss", "fever", "night sweats", "enlarged lymph nodes", "loss of appetite", "cough"],
+                "diagnosis": "Lymphoma"
+            },
+            {
+                "symptoms": ["abdominal pain", "bloating", "diarrhea", "constipation", "mucus in stool", "fatigue", "cramping"],
+                "diagnosis": "Irritable Bowel Syndrome (IBS)"
+            },
+            {
+                "symptoms": ["fatigue", "weight loss", "abdominal pain", "diarrhea", "fever", "joint pain", "eye redness"],
+                "diagnosis": "Crohn's Disease"
+            },
+            {
+                "symptoms": ["joint pain", "swelling", "stiffness", "fatigue", "fever", "rash", "muscle pain"],
+                "diagnosis": "Lupus"
+            },
+            {
+                "symptoms": ["fever", "headache", "nausea", "vomiting", "sensitivity to light", "neck stiffness", "confusion"],
+                "diagnosis": "Bacterial Meningitis"
+            },
+            {
+                "symptoms": ["fever", "cough", "fatigue", "shortness of breath", "chest pain", "muscle pain", "headache"],
+                "diagnosis": "Legionnaires' Disease"
+            },
+            {
+                "symptoms": ["fatigue", "shortness of breath", "chest pain", "palpitations", "swelling in feet", "dizziness", "weakness"],
+                "diagnosis": "Cardiomyopathy"
+            },
+            {
+                "symptoms": ["fever", "rash", "joint pain", "muscle pain", "headache", "nausea", "vomiting"],
+                "diagnosis": "Dengue Fever"
+            },
+            {
+                "symptoms": ["fever", "nausea", "vomiting", "abdominal pain", "loss of appetite", "dark urine", "yellowing of skin and eyes"],
+                "diagnosis": "Hepatitis B"
+            },
+            {
+                "symptoms": ["chest pain", "shortness of breath", "palpitations", "fatigue", "dizziness", "sweating", "nausea"],
+                "diagnosis": "Heart Attack"
+            },
+            {
+                "symptoms": ["fever", "chills", "sweating", "headache", "muscle pain", "fatigue", "vomiting"],
+                "diagnosis": "Malaria"
+            },
+            # Additional common diseases
+            {
+                "symptoms": ["fatigue", "weight gain", "cold intolerance"],
+                "diagnosis": "Hashimoto's Thyroiditis"
+            },
+            {
+                "symptoms": ["fever", "cough", "fatigue"],
+                "diagnosis": "COVID-19"
+            },
+            {
+                "symptoms": ["fever", "chills", "headache"],
+                "diagnosis": "Cholera"
+            },
+            {
+                "symptoms": ["runny nose", "sneezing", "cough"],
+                "diagnosis": "Common Cold"
+            },
+            {
+                "symptoms": ["fever", "cough", "muscle aches"],
+                "diagnosis": "H1N1 (Swine Flu)"
+            },
+            {
+                "symptoms": ["fever", "chills", "muscle pain"],
+                "diagnosis": "Malaria"
+            },
+            {
+                "symptoms": ["fever", "rash", "itching"],
+                "diagnosis": "Measles"
+            },
+            {
+                "symptoms": ["cough", "runny nose", "fever"],
+                "diagnosis": "Respiratory Syncytial Virus (RSV)"
+            },
+            {
+                "symptoms": ["abdominal pain", "bloating", "gas"],
+                "diagnosis": "Constipation"
+            },
+            {
+                "symptoms": ["frequent urination", "increased thirst", "fatigue"],
+                "diagnosis": "Type 2 Diabetes"
+            },
+            # Additional uncommon diseases
+            {
+                "symptoms": ["fatigue", "weight loss", "abdominal pain"],
+                "diagnosis": "Addison's Disease"
+            },
+            {
+                "symptoms": ["muscle pain", "joint stiffness", "skin thickening"],
+                "diagnosis": "Scleroderma"
+            },
+            {
+                "symptoms": ["chronic cough", "fever", "night sweats"],
+                "diagnosis": "Histoplasmosis"
+            },
+            {
+                "symptoms": ["fever", "chills", "confusion"],
+                "diagnosis": "Legionnaires' Disease"
+            },
+            {
+                "symptoms": ["muscle weakness", "difficulty speaking", "drooping eyelids"],
+                "diagnosis": "Myasthenia Gravis"
+            },
+            {
+                "symptoms": ["abdominal pain", "bloody diarrhea", "weight loss"],
+                "diagnosis": "Ulcerative Colitis"
+            },
+            {
+                "symptoms": ["numbness", "tingling", "muscle spasms"],
+                "diagnosis": "Multiple Sclerosis"
+            },
+            {
+                "symptoms": ["sudden vision loss", "eye pain", "flashing lights"],
+                "diagnosis": "Retinal Detachment"
+            },
+            {
+                "symptoms": ["headache", "nausea", "difficulty walking"],
+                "diagnosis": "Chiari Malformation"
+            },
+            {
+                "symptoms": ["fever", "headache", "muscle stiffness"],
+                "diagnosis": "Tetanus"
+            }
+        ]
+
+    def get_diagnosis(self, symptoms):
+        """
+        This method attempts to find a diagnosis based on the symptoms provided by the user.
+        It first tries to find an exact match, and if no match is found, it returns partial matches.
+
+        Args:
+        symptoms (list): A list of symptoms provided by the user.
+
+        Returns:
+        list: A list of possible diagnoses based on exact or partial matches.
+        """
+        possible_diagnoses = []
+
+        # Check for exact matches in the knowledge base
+        for condition in self.knowledge_base:
+            if all(symptom in symptoms for symptom in condition["symptoms"]):
+                possible_diagnoses.append(condition["diagnosis"])
+
+        # If no exact match, find partial matches
+        if not possible_diagnoses:
+            partial_matches = []
+            for condition in self.knowledge_base:
+                matched_symptoms = [symptom for symptom in symptoms if symptom in condition["symptoms"]]
+                if matched_symptoms:
+                    partial_matches.append({
+                        "diagnosis": condition["diagnosis"],
+                        "matched_symptoms": matched_symptoms
+                    })
+
+            if partial_matches:
+                return [f"Partial match for {match['diagnosis']} with symptoms: {', '.join(match['matched_symptoms'])}" for match in partial_matches]
+            else:
+                return ["No matching diagnosis found. Please consult a healthcare professional."]
+
+        return possible_diagnoses
+
+    def find_nearest_diagnosis(self, symptoms):
+        """
+        This method uses K-Nearest Neighbors (KNN) to find the nearest possible disease based on symptoms.
+        It creates a symptom vector for each disease in the knowledge base and the user's symptoms,
+        then uses KNN to classify the user's symptoms to the closest disease.
+
+        Args:
+        symptoms (list): A list of symptoms provided by the user.
+
+        Returns:
+        str: The closest matching diagnosis based on KNN classification.
+        """
+        # Create a set of all unique symptoms in the knowledge base
+        all_symptoms = set()
+        for condition in self.knowledge_base:
+            all_symptoms.update(condition["symptoms"])
+        all_symptoms = sorted(list(all_symptoms))
+
+        # Create a binary vector for each disease in the knowledge base
+        def create_symptom_vector(symptom_list):
+            return [1 if symptom in symptom_list else 0 for symptom in all_symptoms]
+
+        # Prepare data for KNN classifier
+        knowledge_vectors = [create_symptom_vector(condition["symptoms"]) for condition in self.knowledge_base]
+        diagnoses = [condition["diagnosis"] for condition in self.knowledge_base]
+        user_vector = create_symptom_vector(symptoms)
+
+        # Initialize and train the KNN classifier
+        knn = KNeighborsClassifier(n_neighbors=3)  # Using k=3 for nearest neighbors
+        knn.fit(knowledge_vectors, diagnoses)
+
+        # Predict the closest matching disease for the user's symptoms
+        nearest_diagnosis = knn.predict([user_vector])[0]
+
+        return nearest_diagnosis
+
+
+def main():
+    print("\nWelcome to the Medical Diagnosis Expert System\n")
+    print("Below is the list of symptoms recognized by the system:")
+
+    # Get all unique symptoms from the knowledge base
+    expert_system = ExpertSystem()
+    all_symptoms = set()
+    for condition in expert_system.knowledge_base:
+        all_symptoms.update(condition["symptoms"])
+
+    # Display the recognized symptoms
+    print("\n".join(sorted(all_symptoms)))
+
+    print("\nPlease enter the symptoms you are experiencing, separated by commas.")
+
+    try:
+        user_input = input("Symptoms: ")
+        if not user_input.strip():
+            raise ValueError("No symptoms provided. Please enter at least one symptom.")
+        symptoms = [symptom.strip().lower() for symptom in user_input.split(",")]
+
+        # Get possible diagnoses based on exact or partial matches
+        diagnoses = expert_system.get_diagnosis(symptoms)
+
+        print("\nPossible Diagnosis(es):")
+        for diagnosis in diagnoses:
+            print(f"- {diagnosis}")
+
+        # Use KNN to find the nearest possible disease
+        nearest_diagnosis = expert_system.find_nearest_diagnosis(symptoms)
+        print(f"\nNearest Possible Diagnosis (using KNN): {nearest_diagnosis}")
+
+    except ValueError as e:
+        print(f"\nError: {e}")
+    except Exception as e:
+        print(f"\nAn unexpected error occurred: {e}")
+
+    print("\nNote: This expert system is for informational purposes only. Please consult a healthcare professional for accurate diagnosis and treatment.")
+
+
+if __name__ == "__main__":
+    main()
