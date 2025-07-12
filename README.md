@@ -1,4 +1,4 @@
-Medical Diagnosis Expert System<br>
+#Medical Diagnosis Expert System<br>
 A simple AI-powered command-line tool that helps users identify possible diseases based on their symptoms. The system leverages a rule-based expert system along with a K-Nearest Neighbors (KNN) classifier for enhanced accuracy in diagnosis prediction.
 <br>
 Features<br>
